@@ -11,6 +11,9 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_NAME = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
+
+        JAVA_HOME = '/usr/lib/jvm/java-21-openjdk-amd64'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -19,6 +22,17 @@ pipeline {
             steps {
                 echo 'Checking out source code from GitHub'
                 checkout scm
+            }
+        }
+        
+        stage('Verify Java') {
+            steps {
+                sh '''
+                    echo "JAVA_HOME=$JAVA_HOME"
+                    java -version
+                    javac -version
+                    mvn -version
+                '''
             }
         }
 

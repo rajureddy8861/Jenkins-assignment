@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: jenkinsandjava-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-02b6fd891aeb36318,subnet-05ae8ef4da22e3886
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: jenkinsandjava
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

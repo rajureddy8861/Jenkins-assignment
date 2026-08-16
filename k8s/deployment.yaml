@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkinsandjava
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: jenkinsandjava
+
+  template:
+    metadata:
+      labels:
+        app: jenkinsandjava
+
+    spec:
+      containers:
+        - name: jenkinsandjava
+          image: 518692945862.dkr.ecr.us-east-1.amazonaws.com/jenkinsandjava:1.0
+          ports:
+            - containerPort: 8080

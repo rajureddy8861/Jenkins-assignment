@@ -1,4 +1,3 @@
-```groovy
 pipeline {
 
     agent any
@@ -47,7 +46,6 @@ pipeline {
         stage('ECR Login') {
             steps {
                 echo 'Logging into Amazon ECR'
-
                 sh '''
                     aws ecr get-login-password --region ${AWS_REGION} | \
                     docker login --username AWS --password-stdin ${ECR_REGISTRY}
@@ -57,15 +55,14 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                echo "Pushing image to ECR: ${IMAGE_NAME}:${IMAGE_TAG}"
-
+                echo "Pushing image: ${IMAGE_NAME}:${IMAGE_TAG}"
                 sh 'docker push ${IMAGE_NAME}:${IMAGE_TAG}'
             }
         }
 
         stage('Deploy to EKS') {
             steps {
-                echo "Deploying ${IMAGE_NAME}:${IMAGE_TAG} to EKS"
+                echo "Deploying image ${IMAGE_NAME}:${IMAGE_TAG} to EKS"
 
                 sh '''
                     aws eks update-kubeconfig \
@@ -75,30 +72,17 @@ pipeline {
                     kubectl set image deployment/jenkinsandjava \
                       jenkinsandjava=${IMAGE_NAME}:${IMAGE_TAG}
 
-                    kubectl rollout status deployment/jenkinsandjava \
-                      --timeout=180s
-                '''
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                echo 'Verifying Kubernetes deployment'
-
-                sh '''
-                    kubectl get deployment jenkinsandjava
-                    kubectl get pods -l app=jenkinsandjava -o wide
-                    kubectl get svc jenkinsandjava-service
+                    kubectl rollout status deployment/jenkinsandjava --timeout=180s
                 '''
             }
         }
     }
 
     post {
-
         success {
             echo "CI/CD pipeline completed successfully"
             echo "Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            echo "Application deployed to EKS cluster: ${EKS_CLUSTER}"
         }
 
         failure {
@@ -106,4 +90,3 @@ pipeline {
         }
     }
 }
-```
